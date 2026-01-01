@@ -1,17 +1,24 @@
 import os
+import warnings
+
+# Suppress various warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 from dotenv import load_dotenv
 
 load_dotenv()
-from langchain import ChatOpenAI, ChatVertexAI
-from langchain.chains import LLMChain
-from langchain.prompts import ChatPromptTemplate
+from langchain_google_vertexai import ChatVertexAI
+from langchain_core.prompts import PromptTemplate
+
 
 if __name__ == "__main__":
-    openai = ChatOpenAI(model_name="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))
-    vertex = ChatVertexAI(
-        model_name="gemini-1.5-flash", api_key=os.getenv("VERTEX_API_KEY")
-    )
-    prompt = ChatPromptTemplate.from_template("What is the capital of {country}?")
-    chain = LLMChain(llm=openai, prompt=prompt)
-    print(chain.run("India"))
+    openai = ChatVertexAI(model="gemini-2.5-pro", project="dit06-insight-us-idp", location="us-east1")
+    prompt = PromptTemplate(input_variables=["country"], template="What is the capital of {country}?")
+    chain = prompt | openai
+    response = chain.invoke({"country": "India"})
+    print("|--------------------------------------------|")
+    print(response.content)
+    print("|--------------------------------------------|")
+    
